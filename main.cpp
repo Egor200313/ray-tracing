@@ -4,61 +4,24 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include "Shape.cpp"
+#include "config.cpp"
+#include "trace.cpp"
 
-const int WINDOW_WIDTH = 1080;
-const int WINDOW_HEIGHT = 720;
-
-const float xCamera = WINDOW_WIDTH / 2;
-const float yCamera = 300;
-const float distScreen = 500;
-
-sf::Vector3f camera = {-distScreen, xCamera - WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - yCamera};
-
-sf::Vector3f light = {200.0, -400.0, 800.0};
-
-const int light_power = 60;
 
 // 3d ray from dot on the screen
 Ray getRay(float x, float y) {
-    sf::Vector3f screenDot;
-    screenDot.x = 0;
-    screenDot.y = x - WINDOW_WIDTH / 2;
-    screenDot.z = WINDOW_HEIGHT / 2 - y;
-
-    Ray result;
-    result.o = camera;
-    result.direct = screenDot - camera;
-    return result;
+    sf::Vector3f screenDot (
+        0.0,
+        x - WINDOW_WIDTH / 2,
+        WINDOW_HEIGHT / 2 - y
+    );
+    return Ray(camera, normalize(screenDot - camera));
 }
 
 
-sf::Vector3f plane_normal = {0.0, 0.0, 1.0};
-Plane plane(plane_normal, 0.0);
-Sphere sp1(-200.0, 0.0, 80.0, 80.0, Color(56, 123, 76));
-Sphere sp2(-280.0, -60.0, 40.0, 40.0, Color(173, 34, 87));
-std::vector<Shape*> shapes = {&plane, &sp1, &sp2};
-
 Color handlePixel(int x, int y) {
     Ray ray = getRay(x, y);
-    auto hitted_pair = nearest_hit(ray, shapes);
-    Shape* hitted_shape = hitted_pair.first;
-    auto point = hitted_pair.second;
-    sf::Vector3i l = {light_power, light_power, 4*light_power};
-    if (hitted_shape == nullptr) return Color(0, 0, 0);
-
-    Ray to_light;
-    to_light.o = point;
-    to_light.direct = normalize(light - point);
-    auto secondary_hit_pair = nearest_hit(to_light, shapes, hitted_shape);
-    float intensity = dot(hitted_shape->getNormal(point), to_light.direct); // [-1, 1]
-    sf::Vector3i reflected(light_power*intensity, light_power*intensity, light_power*intensity);
-    if (secondary_hit_pair.first == nullptr) return hitted_shape->getColor() + reflected;
-
-    point = secondary_hit_pair.second;
-    float shade_intensity = dot(hitted_shape->getNormal(point), to_light.direct); // [-1, 1]
-    sf::Vector3i shade(-light_power*shade_intensity, -light_power*shade_intensity, -light_power*shade_intensity);
-    Color res = hitted_shape->getColor();
-    return res + shade + reflected;
+    return trace(ray);
 }
 
 int main() {

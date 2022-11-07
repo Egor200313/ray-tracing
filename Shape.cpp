@@ -21,6 +21,7 @@ struct Ray{
     sf::Vector3f o;
     sf::Vector3f direct;
     Ray() = default;
+    Ray(const sf::Vector3f& o, const sf::Vector3f& dir):o(o), direct(dir){}
     Ray(float x0, float y0, float z0, float v1, float v2, float v3){
         o.x = x0;
         o.y = y0;
@@ -66,11 +67,13 @@ Color operator+ (const Color& c1, const Color& c2) {
 
 class Shape {
   public:
-    virtual std::optional<sf::Vector3f> hit(Ray&) = 0;
+    virtual std::optional<sf::Vector3f> hit(const Ray&) = 0;
     virtual Color getColor() = 0;
     virtual sf::Vector3f getNormal(sf::Vector3f) = 0;
 
     virtual bool operator==(const Shape& s) const = 0;
+
+    virtual bool isPlane() = 0;
 };
 
 
@@ -101,7 +104,11 @@ class Sphere: public Shape {
         clr = c;
     }
 
-    std::optional<sf::Vector3f> hit(Ray& ray) override{
+    bool isPlane() override{
+        return false;
+    }
+
+    std::optional<sf::Vector3f> hit(const Ray& ray) override{
         sf::Vector3f diff = ray.o - center;
         float D = dot(diff, ray.direct)*dot(diff, ray.direct) - dot(ray.direct, ray.direct)*(dot(diff, diff)-R*R);
         if (D < 0) return std::nullopt;
@@ -135,7 +142,7 @@ public:
     Plane() = default;
     Plane(sf::Vector3f normal, float bias): normal(normal), bias(bias){}
 
-    std::optional<sf::Vector3f> hit(Ray& ray) override{
+    std::optional<sf::Vector3f> hit(const Ray& ray) override{
         float alpha = (-bias - dot(normal, ray.o)) / dot(normal, ray.direct);
         if (alpha < 0.0) return std::nullopt;
         return std::optional<sf::Vector3f>(ray.o + alpha*ray.direct);
@@ -149,6 +156,10 @@ public:
         return normal;
     }
 
+    bool isPlane() override{
+        return true;
+    }
+
     bool operator==(const Shape& sh)const override{
         const Plane* tmp = dynamic_cast<const Plane*>(&sh);
         if (tmp==NULL) return false;
@@ -156,7 +167,7 @@ public:
     }
 };
 
-std::pair<Shape*, sf::Vector3f> nearest_hit(Ray& ray, std::vector<Shape*> shapes, Shape* except = nullptr){
+std::pair<Shape*, sf::Vector3f> nearest_hit(const Ray& ray, std::vector<Shape*> shapes, Shape* except = nullptr){
     float min_dist = 100000.0;
     Shape* obj = nullptr;
     sf::Vector3f hit_point;
