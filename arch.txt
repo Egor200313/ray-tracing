@@ -1,0 +1,44 @@
+Color handlePixel( int x, int y) 
+    - узнать цвет пикселя, внутри посылаем один луч или несколько, все handlePixel независимы поэтому можно параллелить
+
+Pipeline получения цвета по лучу:
+    Луч --> ищем пересечение: 1. нет пересечения => цвет неба
+                              2. есть пересечение: 1. Зеркало => пускаем луч к свету для объема -> Цвет1
+                                                                 пускаем второй луч отраженный и переходим в начало -> Цвет2
+                                                                 return Цвет1 + Цвет2
+                                                   2. Обычное => пускаем луч к свету для объема -> Цвет1
+                                                                 return Цвет1
+
+vector to_light(point):
+    return normalize(light - point)
+
+Color castRay(Ray, except):
+    intersect = nearest_intersect(Ray, except)
+    if (intersect == nullptr) return SkyColor
+    else:
+        material = intersect.material
+        light_ray = to_light(intersect.point)
+        emitted_color = emission(light_ray, intersect.obj, intersect.point)
+        if (light_ray.intersect) => shade
+        resultColor = emitted_color + shade
+
+        if (material == Mirror):
+            refracted_ray = refract(ray, intersect.point)
+            resultColor += castRay(refracted_ray, intersect.obj) // проблема: нужно различать два случая 1. отраженный луч никого не пересек тогда цвет освещения
+                                                                                                         2. отраженный луч кого-то пересек 
+                                                                                                            тогда цвет уже самого пересеченного объекта а не освещения
+                                                                                                            возможно нужно брать какое-то соотношение
+        if (material == Simple):
+            continue
+
+        return resultColor
+
+Color emission(light_ray, intersect.obj, intersect.point):
+    angle = dot(intersect.obj.normal(intersect.point), to_light.direct)
+    color_offset = ((angle + 1)**2 - 1)*{255, 255, 255}
+    return intersect.obj.color + color_offset
+
+Color shade(intersect.point, intersect.obj):
+    angle = dot(intersect.obj.normal(intersect.point), to_light(intersect.point))
+    color_offset = -((angle + 1)**2 - 1)*{255, 255, 255}
+    return intersect.obj.color + color_offset

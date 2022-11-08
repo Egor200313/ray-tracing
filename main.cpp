@@ -7,6 +7,7 @@
 #include "config.cpp"
 #include "trace.cpp"
 
+// want to include only tracer and scene
 
 // 3d ray from dot on the screen
 Ray getRay(float x, float y) {
