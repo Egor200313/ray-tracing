@@ -1,3 +1,4 @@
+#include <cmath>
 #include <SFML/System/Vector3.hpp>
 
 float dot(const sf::Vector3f& v1, const sf::Vector3f& v2){

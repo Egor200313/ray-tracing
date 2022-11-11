@@ -1,6 +1,7 @@
 #pragma once
 #include <SFML/System/Vector3.hpp>
 #include "ray.hpp"
+#include "../materials/material.hpp"
 #include <optional>
 
 class Shape {
@@ -12,4 +13,6 @@ class Shape {
     virtual bool operator==(const Shape& s) const = 0;
 
     virtual bool isPlane() = 0;
+
+    virtual Material getMaterial() = 0;
 };

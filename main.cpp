@@ -3,45 +3,43 @@
 #include <optional>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
-#include "Shape.cpp"
-#include "config.cpp"
-#include "trace.cpp"
+
+#include "tracer/tracer.hpp"
+#include "shapes/plane.hpp"
+#include "shapes/sphere.hpp"
 
 // want to include only tracer and scene
 
-// 3d ray from dot on the screen
-Ray getRay(float x, float y) {
-    sf::Vector3f screenDot (
-        0.0,
-        x - WINDOW_WIDTH / 2,
-        WINDOW_HEIGHT / 2 - y
-    );
-    return Ray(camera, normalize(screenDot - camera));
-}
-
-
-Color handlePixel(int x, int y) {
-    Ray ray = getRay(x, y);
-    return trace(ray);
-}
 
 int main() {
+    const int WINDOW_WIDTH = 1080;
+    const int WINDOW_HEIGHT = 720;
+
     sf::Texture texture;
     if (!texture.create(WINDOW_WIDTH, WINDOW_HEIGHT)) std::cout << "Error while creating texture!\n";
 
     sf::Uint8* pixels = new sf::Uint8[WINDOW_WIDTH * WINDOW_HEIGHT * 4];
+    Scene scene;
+    const float xCamera = WINDOW_WIDTH / 2;
+    const float yCamera = 300;
+    const float distScreen = 500;
 
-    Color color;
-    for (int x = 0; x < WINDOW_WIDTH; ++x) {
-        for (int y = 0; y < WINDOW_HEIGHT; ++y) {
-            int index = (y*WINDOW_WIDTH + x) * 4;
-            color = handlePixel(x, y);
-            pixels[index] = color.r;
-            pixels[index+1] = color.g;
-            pixels[index+2] = color.b;
-            pixels[index+3] = color.a;
-        }
-    }
+    scene.setCamera({-distScreen, xCamera - WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - yCamera});
+
+    scene.addLight({200.0, -400.0, 800.0});
+
+    scene.setScreen(WINDOW_WIDTH, WINDOW_HEIGHT);
+
+    Plane plane({0.0, 0.0, 1.0}, 0.0);
+    Sphere sp1(-100.0, 0.0, 80.0, 80.0, Color(56, 123, 76));
+    Sphere sp2(-200.0, -80.0, 40.0, 40.0, Color(173, 34, 87));
+    std::vector<Shape*> shapes = {&plane, &sp1, &sp2};
+    
+    scene.addObjects(shapes);
+    // scene construction
+
+    Tracer tracer(&scene);
+    tracer.traceScene(pixels);
     
     texture.update(pixels);
     texture.copyToImage().saveToFile("texture.png");

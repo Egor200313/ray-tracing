@@ -45,3 +45,11 @@ bool Sphere::operator==(const Shape& sh)const override{
     if (tmp==NULL) return false;
     return tmp->R == R && tmp->center == center;
 }
+
+Material Sphere::getMaterial(){
+    return this->mat;
+}
+
+void Sphere::setMaterial(Material m){
+    this->mat = m;
+}

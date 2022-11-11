@@ -25,3 +25,11 @@ bool Plane::operator==(const Shape& sh)const override{
     if (tmp==NULL) return false;
     return tmp->bias == bias && tmp->normal == normal;
 }
+
+Material Plane::getMaterial(){
+    return this->mat;
+}
+
+void Plane::setMaterial(Material m){
+    this->mat = m;
+}

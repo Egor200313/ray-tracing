@@ -4,6 +4,7 @@ class Plane: public Shape {
 public:
     sf::Vector3f normal;
     float bias;
+    Material mat = cmat;
     Plane() = default;
     Plane(sf::Vector3f normal, float bias);
 
@@ -14,4 +15,8 @@ public:
     bool isPlane() override;
 
     bool operator==(const Shape& sh)const override;
+
+    Material getMaterial() override;
+    void setMaterial(Material m);
+   
 };
