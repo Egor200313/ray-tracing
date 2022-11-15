@@ -4,6 +4,7 @@
 #include <vector>
 #include <SFML/Graphics.hpp>
 #include <cmath>
+#include <thread>
 
 std::pair<Shape*, sf::Vector3f> nearest_hit(const Ray& ray, std::vector<Shape*> shapes, Shape* except = nullptr){
     float min_dist = 100000.0;
@@ -86,15 +87,28 @@ Color Tracer::trace(const Ray& ray) {
 }
 
 void Tracer::traceScene(sf::Uint8* pixels) {
-    Color color;
-    for (int x = 0; x < scene->getScreenWidth(); ++x) {
-        for (int y = 0; y < scene->getScreenHeight(); ++y) {
-            int index = (y * scene->getScreenWidth() + x) * 4;
-            color = handlePixel(x, y);
-            pixels[index] = color.r;
-            pixels[index+1] = color.g;
-            pixels[index+2] = color.b;
-            pixels[index+3] = color.a;
+
+    auto partial_trace = [pixels, this](int x_start, int y_start){
+        Color color;
+        for (int x = x_start; x < scene->getScreenWidth(); x+=2) {
+            for (int y = y_start; y < scene->getScreenHeight(); y+=2) {
+                int index = (y * scene->getScreenWidth() + x) * 4;
+                color = handlePixel(x, y);
+                pixels[index] = color.r;
+                pixels[index+1] = color.g;
+                pixels[index+2] = color.b;
+                pixels[index+3] = color.a;
+            }
         }
-    }
+    };
+
+    std::thread t1(partial_trace, 0, 0);
+    std::thread t2(partial_trace, 1, 0);
+    std::thread t3(partial_trace, 0, 1);
+    std::thread t4(partial_trace, 1, 1);
+
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
 }

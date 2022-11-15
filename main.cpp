@@ -3,6 +3,7 @@
 #include <optional>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
+#include <chrono>
 
 
 #include "shapes/plane.hpp"
@@ -29,6 +30,8 @@ int main() {
     if (!texture.create(WINDOW_WIDTH, WINDOW_HEIGHT)) std::cout << "Error while creating texture!\n";
 
     sf::Uint8* pixels = new sf::Uint8[WINDOW_WIDTH * WINDOW_HEIGHT * 4];
+
+    //////////////////////// Scene construction start ////////////////////////
     Scene scene;
     const float xCamera = WINDOW_WIDTH / 2;
     const float yCamera = 300;
@@ -48,10 +51,16 @@ int main() {
     std::vector<Shape*> shapes = {&plane, &sp1};
     
     scene.addObjects(shapes);
-    // scene construction
+    //////////////////////// Scene construction end ////////////////////////
 
     Tracer tracer(&scene);
+
+    auto t1 = std::chrono::high_resolution_clock::now();
     tracer.traceScene(pixels);
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
+    std::cout << ms_int.count() << "ms\n";
     
     texture.update(pixels);
     texture.copyToImage().saveToFile("../texture.png");
