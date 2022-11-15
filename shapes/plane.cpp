@@ -1,26 +1,27 @@
 #include "plane.hpp"
+#include "../utils/utils.hpp"
 
-Plane::Plane(sf::Vector3f normal, float bias): normal(normal), bias(bias){}
+Plane::Plane(sf::Vector3f normal, float bias, Color color): normal(normal), bias(bias), color(color){}
 
-std::optional<sf::Vector3f> Plane::hit(const Ray& ray) override{
+std::optional<sf::Vector3f> Plane::hit(const Ray& ray){
     float alpha = (-bias - dot(normal, ray.o)) / dot(normal, ray.direct);
     if (alpha < 0.0) return std::nullopt;
     return std::optional<sf::Vector3f>(ray.o + alpha*ray.direct);
 }
 
-Color Plane::getColor() override{
-    return Color(100, 100, 100);
+Color Plane::getColor() {
+    return color;
 }
 
-sf::Vector3f Plane::getNormal(sf::Vector3f) override{
+sf::Vector3f Plane::getNormal(sf::Vector3f) {
     return normal;
 }
 
-bool Plane::isPlane() override{
+bool Plane::isPlane() {
     return true;
 }
 
-bool Plane::operator==(const Shape& sh)const override{
+bool Plane::operator==(const Shape& sh)const {
     const Plane* tmp = dynamic_cast<const Plane*>(&sh);
     if (tmp==NULL) return false;
     return tmp->bias == bias && tmp->normal == normal;

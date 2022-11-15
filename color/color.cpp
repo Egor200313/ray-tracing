@@ -1,6 +1,6 @@
 #include "color.hpp"
 
-Color::Color operator+ (const sf::Vector3i& a){
+Color Color::operator+ (const sf::Vector3i& a){
     int red = r + a.x;
     int green = g + a.y;
     int blue = b + a.z;
@@ -13,7 +13,7 @@ Color::Color operator+ (const sf::Vector3i& a){
     return Color(red, green, blue, this->a);
 }
 
-Color::Color operator* (const float& ratio){
+Color Color::operator* (const float& ratio){
     int red = r * ratio;
     int green = g * ratio;
     int blue = b * ratio;

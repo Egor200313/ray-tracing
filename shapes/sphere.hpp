@@ -5,7 +5,7 @@ class Sphere: public Shape {
     sf::Vector3f center;
     float R;
     Color clr;
-    Material mat = cmat;
+    Material mat;
     Sphere() = default;
     Sphere(float x0, float y0, float z0, float R);
     Sphere(float x0, float y0, float z0, float R, Color c);

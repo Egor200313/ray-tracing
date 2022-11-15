@@ -10,6 +10,7 @@ private:
         int width;
         int height;
     };
+    screen screen;
 public:
     Scene() = default;
     Scene(const Scene&) = delete; // not copiable

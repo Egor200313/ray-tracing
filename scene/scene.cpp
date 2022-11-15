@@ -8,7 +8,7 @@ void Scene::addObjects(std::vector<Shape*> objects){
     this->objects = objects;
 }
 
-void void Scene::addLight(sf::Vector3f light){
+void Scene::addLight(sf::Vector3f light){
     this->lights.push_back(light);
 }
 

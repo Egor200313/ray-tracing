@@ -1,4 +1,6 @@
 #include "sphere.hpp"
+#include "../utils/utils.hpp"
+#include <cmath>
 
 Sphere::Sphere(float x0, float y0, float z0, float R):center({x0, y0, z0}), R(R){
     clr = Color(0, 0, 0);
@@ -10,17 +12,16 @@ Sphere::Sphere(float x0, float y0, float z0, float R, Color c){
     this->R = R;
     clr = c;
 }
-Sphere::Sphere(const Sphere& s) = default;
 
 void Sphere::setColor(Color c) {
     clr = c;
 }
 
-bool Sphere::isPlane() override{
+bool Sphere::isPlane() {
     return false;
 }
 
-std::optional<sf::Vector3f> Sphere::hit(const Ray& ray) override{
+std::optional<sf::Vector3f> Sphere::hit(const Ray& ray) {
     sf::Vector3f diff = ray.o - center;
     float D = dot(diff, ray.direct)*dot(diff, ray.direct) - dot(ray.direct, ray.direct)*(dot(diff, diff)-R*R);
     if (D < 0) return std::nullopt;
@@ -32,15 +33,15 @@ std::optional<sf::Vector3f> Sphere::hit(const Ray& ray) override{
     return std::optional<sf::Vector3f>(ray.o + alpha1*ray.direct); // only the nearest hit point
 }
 
-Color Sphere::getColor() override {
+Color Sphere::getColor() {
     return clr;
 }
 
-sf::Vector3f Sphere::getNormal(sf::Vector3f point) override{
+sf::Vector3f Sphere::getNormal(sf::Vector3f point) {
     return normalize(point - center);
 }
 
-bool Sphere::operator==(const Shape& sh)const override{
+bool Sphere::operator==(const Shape& sh) const {
     const Sphere* tmp = dynamic_cast<const Sphere*>(&sh);
     if (tmp==NULL) return false;
     return tmp->R == R && tmp->center == center;
