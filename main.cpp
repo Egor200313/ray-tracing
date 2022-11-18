@@ -8,9 +8,28 @@
 
 #include "shapes/plane.hpp"
 #include "shapes/sphere.hpp"
+#include "shapes/polyhedron.hpp"
 #include "tracer/tracer.hpp"
+#include "utils/utils.hpp"
+#include "shapes/cube.hpp"
 
 // want to include only tracer and scene
+
+int index(int x, int y, int width){
+    return (y * width + x) * 4;
+}
+
+void blur(sf::Uint8* pixels, int width, int height) {
+    for (int x = 1; x < width - 1; ++x){
+        for (int y = 1; y < height - 1; ++y){
+            int indexx = (y * width + x) * 4;
+            pixels[indexx] = (pixels[index(x + 1, y, width)] + pixels[index(x - 1, y, width)] + pixels[index(x, y + 1, width)] + pixels[index(x, y - 1, width)]) / 4;
+            pixels[indexx+1] = (pixels[index(x + 1, y, width) + 1] + pixels[index(x - 1, y, width)+1] + pixels[index(x, y + 1, width)+1] + pixels[index(x, y - 1, width)+1]) / 4;
+            pixels[indexx+2] = (pixels[index(x + 1, y, width)+2] + pixels[index(x - 1, y, width)+2] + pixels[index(x, y + 1, width)+2] + pixels[index(x, y - 1, width)+2]) / 4;
+            pixels[indexx+3] = (pixels[index(x + 1, y, width)+3] + pixels[index(x - 1, y, width)+3] + pixels[index(x, y + 1, width)+3] + pixels[index(x, y - 1, width)+3]) / 4;
+        }
+    }
+}
 
 namespace material{
     Material BRONZE = Material({0.2125, 0.1275, 0.054}, {0.714, 0.4284, 0.181}, {0.3935, 0.2719, 0.1667}, 25);
@@ -39,7 +58,7 @@ int main() {
 
     scene.setCamera({-distScreen, xCamera - WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - yCamera});
 
-    scene.addLight({-300.0, -60.0, 300.0});
+    scene.addLight({-300.0, -120.0, 300.0});
 
     scene.setScreen(WINDOW_WIDTH, WINDOW_HEIGHT);
 
@@ -48,8 +67,8 @@ int main() {
     Sphere sp2(-200.0, -80.0, 40.0, 40.0, Color(255, 255, 255));
     sp1.setMaterial(material::GOLD);
     plane.setMaterial(material::PLASTIC);
-    std::vector<Shape*> shapes = {&plane, &sp1};
-    
+
+    std::vector<Shape*> shapes = {&plane, &sp1, &sp2};
     scene.addObjects(shapes);
     //////////////////////// Scene construction end ////////////////////////
 
@@ -61,7 +80,7 @@ int main() {
 
     auto ms_int = std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1);
     std::cout << ms_int.count() << "ms\n";
-    
+    blur(pixels, WINDOW_WIDTH, WINDOW_HEIGHT);
     texture.update(pixels);
     texture.copyToImage().saveToFile("../texture.png");
 
@@ -111,3 +130,23 @@ int main() {
     /*auto result = intersect(8.0, 2.0, 4.0, 2.0, 8.0, 2.0, 4.0);
     if (result.first.has_value()) std::cout << result.first.value().first << " " << result.first.value().second << std::endl;
     if (result.second.has_value()) std::cout << result.second.value().first << " " << result.second.value().second << std::endl;*/
+
+     /*sf::Vector3f p1 = {-150.0, -150.0, 0.0};
+    sf::Vector3f p2 = {-200.0, 0.0, 100.0};
+    sf::Vector3f p3 = {-220.0, 10.0, 40.0};
+    sf::Vector3f p4 = {-120.0, 50.0, 0.0};
+
+    Triangle v1({p1,p2,p3});
+    Triangle v2({p1,p2,p4});
+    Triangle v3({p2,p4,p3});
+    Triangle v4({p1,p4,p3});
+
+    std::vector<sf::Vector3f>normals = {
+        normalize(-cross(p2-p3, p1-p3)),
+        normalize(cross(p1-p4, p2-p4)),
+        normalize(cross(p4-p3, p2-p3)),
+        normalize({0.0, 0.0, -1.0})
+    };
+
+    Polyhedron poly(std::vector<Triangle>({v1, v2, v3, v4}), normals);
+    poly.setMaterial(material::GOLD);*/

@@ -81,7 +81,7 @@ Color Tracer::trace(const Ray& ray) {
 
     Ray to_light = Ray(point, scene->lights[0] - point);
     auto intersect = nearest_hit(to_light, scene->objects, hitted_shape);
-    if (intersect.first != nullptr) return Color(0,0,0);
+    if (intersect.first != nullptr) return Color(30,30,30);
 
     return getIllumination(point, hitted_shape);
 }
