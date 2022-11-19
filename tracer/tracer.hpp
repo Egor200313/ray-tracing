@@ -10,7 +10,7 @@ private:
     Ray getRay(float x, float y);
     Color handlePixel(int x, int y);
     Color getIllumination(sf::Vector3f, Shape*);
-    Color trace(const Ray&);
+    Color trace(const Ray&, int);
 
 public:
     Tracer() = default;

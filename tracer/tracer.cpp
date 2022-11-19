@@ -38,7 +38,7 @@ Ray Tracer::getRay(float x, float y) {
 
 Color Tracer::handlePixel(int x, int y) {
     Ray ray = getRay(x, y);
-    return trace(ray);
+    return trace(ray, 3);
 }
 
 Color Tracer::getIllumination(sf::Vector3f point, Shape* shape){
@@ -73,17 +73,28 @@ Color Tracer::getIllumination(sf::Vector3f point, Shape* shape){
 
 }
 
-Color Tracer::trace(const Ray& ray) {
+Color Tracer::trace(const Ray& ray, int depth) {
     auto first_hit_pair = nearest_hit(ray, scene->objects);
     Shape* hitted_shape = first_hit_pair.first;
     auto point = first_hit_pair.second;
     if (hitted_shape == nullptr) return Color(0, 0, 0);
 
+    Color local_color;
     Ray to_light = Ray(point, scene->lights[0] - point);
     auto intersect = nearest_hit(to_light, scene->objects, hitted_shape);
-    if (intersect.first != nullptr) return Color(30,30,30);
+    if (intersect.first != nullptr) local_color = Color(0,0,0);
+    else local_color = getIllumination(point, hitted_shape);
 
-    return getIllumination(point, hitted_shape);
+    float r = hitted_shape->getMaterial().reflect_ratio;
+    if (depth <= 0 || r <= 0.0) {
+        return local_color;
+    }
+
+    sf::Vector3f N = hitted_shape->getNormal(point);
+    sf::Vector3f reflected = N * dot(N,ray.direct) * (-2.0f) + ray.direct;
+    Ray reflected_ray = Ray(point, reflected);
+
+    return local_color * (1 - r) + trace(reflected_ray, depth - 1) * r;
 }
 
 void Tracer::traceScene(sf::Uint8* pixels) {

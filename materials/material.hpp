@@ -9,7 +9,10 @@ struct Material{
     sf::Vector3f specular_ratio = {0.3935, 0.2719, 0.1667};
     float shiness = 25;
 
+    float reflect_ratio = -1.0;
+
     Material& operator=(const Material& other) = default;
     Material() = default;
     Material(sf::Vector3f, sf::Vector3f, sf::Vector3f, int);
+    Material(sf::Vector3f, sf::Vector3f, sf::Vector3f, int, float);
 };
