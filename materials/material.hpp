@@ -10,9 +10,11 @@ struct Material{
     float shiness = 25;
 
     float reflect_ratio = -1.0;
+    float refract_ratio = 1.0;
 
     Material& operator=(const Material& other) = default;
     Material() = default;
     Material(sf::Vector3f, sf::Vector3f, sf::Vector3f, int);
     Material(sf::Vector3f, sf::Vector3f, sf::Vector3f, int, float);
+    Material(sf::Vector3f, sf::Vector3f, sf::Vector3f, int, float, float);
 };

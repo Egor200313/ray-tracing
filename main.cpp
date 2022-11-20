@@ -34,10 +34,11 @@ void blur(sf::Uint8* pixels, int width, int height) {
 namespace material{
     Material BRONZE = Material({0.2125, 0.1275, 0.054}, {0.714, 0.4284, 0.181}, {0.3935, 0.2719, 0.1667}, 25, 0.3);
     Material CHROME = Material({0.25, 0.25, 0.25}, {0.4, 0.4, 0.4}, {0.774597, 0.774597, 0.774597}, 76);
-    Material GOLD = Material({0.24725, 0.1995, 0.0745}, {0.75164, 0.60648, 0.22648}, {0.628281, 0.555802, 0.366065}, 51, 0.3);
+    Material GOLD = Material({0.24725, 0.1995, 0.0745}, {0.75164, 0.60648, 0.22648}, {0.628281, 0.555802, 0.366065}, 51, 0.4);
     Material OBSIDIAN = Material({0.05375, 0.05, 0.06625}, {0.18275, 0.17, 0.22525}, {0.332741, 0.328634, 0.346435}, 38);
     Material PLASTIC = Material({1.0, 1.0, 1.0}, {0.4, 0.4, 0.4}, {0.5, 0.5, 0.5}, 32);
     Material MIRROR = Material({1.0, 1.0, 1.0}, {0.4, 0.4, 0.4}, {0.5, 0.5, 0.5}, 32, 0.8);
+    Material GLASS = Material({0.0, 0.0, 0.0}, {0.0, 0.0, 0.0}, {1.0, 1.0, 1.0}, 15, -0.8, 1.5);
 }
 
 
@@ -64,13 +65,16 @@ int main() {
     scene.setScreen(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     Plane plane({0.0, 0.0, 1.0}, 0.0, Color(50, 50, 50));
-    Sphere sp1(-100.0, 0.0, 80.0, 80.0, Color(255, 255, 255));
-    Sphere sp2(-200.0, -80.0, 40.0, 40.0, Color(255, 255, 255));
-    sp1.setMaterial(material::GOLD);
+    Sphere sp1(-200.0, 0.0, 100.0, 80.0, Color(255, 255, 255));
+    Sphere sp2(300.0, 0.0, 300.0, 300.0, Color(255, 255, 255));
+    sp1.setMaterial(material::GLASS);
     sp2.setMaterial(material::BRONZE);
     plane.setMaterial(material::MIRROR);
 
-    std::vector<Shape*> shapes = {&plane, &sp1, &sp2};
+    Cube cube({-100.0, -300.0, 0.0}, 200);
+    cube.setMaterial(material::OBSIDIAN);
+
+    std::vector<Shape*> shapes = {&plane, &sp1, &cube};
     scene.addObjects(shapes);
     //////////////////////// Scene construction end ////////////////////////
 

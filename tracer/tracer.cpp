@@ -70,7 +70,15 @@ Color Tracer::getIllumination(sf::Vector3f point, Shape* shape){
                 fmin(255, ambient_intensity.g*k_a.y + diffuse_intensity.g*k_d.y*diff_dot + specular_intensity.g*k_s.y*pos_diff_dot*std::pow(fmax(0.0, dot(R, V)), shiness)),
                 fmin(255, ambient_intensity.b*k_a.z + diffuse_intensity.b*k_d.z*diff_dot + specular_intensity.b*k_s.z*pos_diff_dot*std::pow(fmax(0.0, dot(R, V)), shiness))
                 );
+}
 
+sf::Vector3f Tracer::refracted_dir(const Ray& ray, sf::Vector3f normal, float n2) { // it works correctly
+    float n1 = ray.refraction_value;
+    normal = normalize(normal);
+    sf::Vector3f norm_dir = normalize(ray.direct);
+    float cos = -dot(norm_dir, normal);
+    float nr = n1 / n2;
+    return nr*norm_dir + static_cast<float>(nr*cos - std::sqrt(1.0 - nr*nr*(1.0-cos*cos)))*normal;
 }
 
 Color Tracer::trace(const Ray& ray, int depth) {
@@ -86,11 +94,36 @@ Color Tracer::trace(const Ray& ray, int depth) {
     else local_color = getIllumination(point, hitted_shape);
 
     float r = hitted_shape->getMaterial().reflect_ratio;
+    sf::Vector3f N = hitted_shape->getNormal(point);
+
+    float n_new = hitted_shape->getMaterial().refract_ratio;
+    float n_cur = ray.refraction_value;
+    
+    if (n_new != 1.0){
+        sf::Vector3f refracted = refracted_dir(ray, N, n_new);
+        
+        Ray new_ray = Ray(point, refracted, n_new);
+        
+        auto exit = nearest_hit(new_ray, scene->objects);
+        if (exit.first == nullptr) { 
+            return local_color;
+        }
+        auto exit_point = exit.second;
+        sf::Vector3f exitN = hitted_shape->getNormal(exit_point);
+        refracted = refracted_dir(new_ray, -exitN, 1.0);
+        
+        Ray out(exit_point, refracted, 1.0);
+        local_color = local_color * 0.8 + trace(out, depth);
+    }
+
+
     if (depth <= 0 || r <= 0.0) {
         return local_color;
     }
+    
+    
 
-    sf::Vector3f N = hitted_shape->getNormal(point);
+    
     sf::Vector3f reflected = N * dot(N,ray.direct) * (-2.0f) + ray.direct;
     Ray reflected_ray = Ray(point, reflected);
 

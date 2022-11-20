@@ -16,5 +16,6 @@ public:
     Tracer() = default;
     Tracer(Scene*);
 
+    sf::Vector3f refracted_dir(const Ray& ray, sf::Vector3f normal, float n2);
     void traceScene(sf::Uint8*);
 };
