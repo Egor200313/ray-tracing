@@ -29,7 +29,7 @@ std::optional<sf::Vector3f> Sphere::hit(const Ray& ray) {
     float alpha2 = (-dot(diff, ray.direct) - std::sqrt(D)) / dot(ray.direct, ray.direct);
     if (alpha1 > alpha2) std::swap(alpha1, alpha2);
     if (alpha1 < 0.0001 && alpha2 < 0.0001) return std::nullopt;
-    if (alpha1 < 0.1) return std::optional<sf::Vector3f>(ray.o + alpha2*ray.direct);
+    if (alpha1 < 0.0001) return std::optional<sf::Vector3f>(ray.o + alpha2*ray.direct);
     return std::optional<sf::Vector3f>(ray.o + alpha1*ray.direct); // only the nearest hit point
 }
 

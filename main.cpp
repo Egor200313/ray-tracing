@@ -60,21 +60,21 @@ int main() {
 
     scene.setCamera({-distScreen, xCamera - WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - yCamera});
 
-    scene.addLight({-300.0, -120.0, 300.0});
+    scene.addLight({-300.0, -120.0, 800.0});
 
     scene.setScreen(WINDOW_WIDTH, WINDOW_HEIGHT);
 
     Plane plane({0.0, 0.0, 1.0}, 0.0, Color(50, 50, 50));
-    Sphere sp1(-200.0, 0.0, 100.0, 80.0, Color(255, 255, 255));
-    Sphere sp2(300.0, 0.0, 300.0, 300.0, Color(255, 255, 255));
+    Sphere sp1(-200.0, 0.0, 50.0, 50.0, Color(255, 255, 255));
+    Sphere sp2(300.0, -100.0, 200.0, 200.0, Color(255, 255, 255));
     sp1.setMaterial(material::GLASS);
     sp2.setMaterial(material::BRONZE);
     plane.setMaterial(material::MIRROR);
 
-    Cube cube({-100.0, -300.0, 0.0}, 200);
-    cube.setMaterial(material::OBSIDIAN);
+    //Cube cube({-100.0, -300.0, 0.0}, 200);
+    //cube.setMaterial(material::OBSIDIAN);
 
-    std::vector<Shape*> shapes = {&plane, &sp1, &cube};
+    std::vector<Shape*> shapes = {&plane, &sp1, &sp2};
     scene.addObjects(shapes);
     //////////////////////// Scene construction end ////////////////////////
 

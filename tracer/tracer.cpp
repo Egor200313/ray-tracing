@@ -91,6 +91,7 @@ Color Tracer::trace(const Ray& ray, int depth) {
     Ray to_light = Ray(point, scene->lights[0] - point);
     auto intersect = nearest_hit(to_light, scene->objects, hitted_shape);
     if (intersect.first != nullptr) local_color = Color(0,0,0);
+    
     else local_color = getIllumination(point, hitted_shape);
 
     float r = hitted_shape->getMaterial().reflect_ratio;
