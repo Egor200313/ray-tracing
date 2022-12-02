@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include <chrono>
 
-
+#include "lighting/lightEmittor.hpp"
 #include "shapes/plane.hpp"
 #include "shapes/sphere.hpp"
 #include "shapes/polyhedron.hpp"
@@ -55,12 +55,13 @@ int main() {
     //////////////////////// Scene construction start ////////////////////////
     Scene scene;
     const float xCamera = WINDOW_WIDTH / 2;
-    const float yCamera = 300;
+    const float yCamera = WINDOW_HEIGHT / 2 - 100;
     const float distScreen = 500;
 
     scene.setCamera({-distScreen, xCamera - WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2 - yCamera});
 
-    scene.addLight({-300.0, -120.0, 800.0});
+    scene.addLight(LightEmittor({-300.0, -120.0, 800.0}, Color(255, 255, 255), Color(255, 255, 255), Color(255, 255, 255)));
+    scene.addLight(LightEmittor({0.0, 300.0, 600.0}, Color(255, 255, 255), Color(255, 255, 255), Color(255, 255, 255)));
 
     scene.setScreen(WINDOW_WIDTH, WINDOW_HEIGHT);
 

@@ -13,7 +13,7 @@ std::pair<Shape*, sf::Vector3f> nearest_hit(const Ray& ray, std::vector<Shape*> 
     for (auto shape: shapes) {
         if (except != nullptr && *shape == *except) continue;
         auto point = shape->hit(ray);
-        if (point.has_value() && dist(ray.o, point.value()) < min_dist && dist(ray.o, point.value()) > 0.1) {
+        if (point.has_value() && dist(ray.o, point.value()) < min_dist && dist(ray.o, point.value()) > 0.01) {
             min_dist = dist(ray.o, point.value());
             obj = shape;
             hit_point = point.value();
@@ -38,20 +38,14 @@ Ray Tracer::getRay(float x, float y) {
 
 Color Tracer::handlePixel(int x, int y) {
     Ray ray = getRay(x, y);
-    return trace(ray, 3);
+    return trace(ray, 5);
 }
 
 Color Tracer::getIllumination(sf::Vector3f point, Shape* shape){
     // Implementation of Phong shading
-    //Color ambient_intensity(100, 100, 100); // color
-    Color ambient_intensity = shape->getColor();
-
-    Material material = shape->getMaterial();
-
-    Color diffuse_intensity = material.diffuse_intensity;
-    Color specular_intensity = material.specular_intensity;
 
     // material props
+    Material material = shape->getMaterial();
     sf::Vector3f k_a = material.ambient_ratio;
     sf::Vector3f k_d = material.diffuse_ratio;
     sf::Vector3f k_s = material.specular_ratio;
@@ -59,17 +53,27 @@ Color Tracer::getIllumination(sf::Vector3f point, Shape* shape){
 
     sf::Vector3f N = shape->getNormal(point);
     sf::Vector3f V = normalize(scene->camera - point);
-    sf::Vector3f L = normalize(scene->lights[0] - point);
-    sf::Vector3f R = normalize(N * dot(L,N) * (2.0f) - L);
+    sf::Vector3f L, R;
+    Color result(0,0,0);
+    for (int i = 0; i < scene->lights.size(); ++i) {
+        Color ambient_intensity = scene->lights[i].ambient_intensity;
+        Color diffuse_intensity = scene->lights[i].diffuse_intensity;
+        Color specular_intensity = scene->lights[i].specular_intensity;
 
-    float diff_dot = fmax(0.0, dot(L, N));
-    float pos_diff_dot = (diff_dot > 0.00000001 ? 1.0 : 0.0);
+        L = normalize(scene->lights[i].position - point);
+        R = normalize(N * dot(L,N) * (2.0f) - L);
 
-    return Color(
+        float diff_dot = fmax(0.0, dot(L, N));
+        float pos_diff_dot = (diff_dot > 0.00000001 ? 1.0 : 0.0);
+
+        result = result + Color(
                 fmin(255, ambient_intensity.r*k_a.x + diffuse_intensity.r*k_d.x*diff_dot + specular_intensity.r*k_s.x*pos_diff_dot*std::pow(fmax(0.0, dot(R, V)), shiness)),
                 fmin(255, ambient_intensity.g*k_a.y + diffuse_intensity.g*k_d.y*diff_dot + specular_intensity.g*k_s.y*pos_diff_dot*std::pow(fmax(0.0, dot(R, V)), shiness)),
                 fmin(255, ambient_intensity.b*k_a.z + diffuse_intensity.b*k_d.z*diff_dot + specular_intensity.b*k_s.z*pos_diff_dot*std::pow(fmax(0.0, dot(R, V)), shiness))
                 );
+    }
+    
+    return result;
 }
 
 sf::Vector3f Tracer::refracted_dir(const Ray& ray, sf::Vector3f normal, float n2) { // it works correctly
@@ -87,12 +91,17 @@ Color Tracer::trace(const Ray& ray, int depth) {
     auto point = first_hit_pair.second;
     if (hitted_shape == nullptr) return Color(0, 0, 0);
 
-    Color local_color;
-    Ray to_light = Ray(point, scene->lights[0] - point);
-    auto intersect = nearest_hit(to_light, scene->objects, hitted_shape);
-    if (intersect.first != nullptr) local_color = Color(0,0,0);
+    Color local_color = Color(0,0,0);
+    for (int i = 0; i < scene->lights.size(); ++i){
+        Ray to_light = Ray(point, scene->lights[i].position - point);
+        auto intersect = nearest_hit(to_light, scene->objects, hitted_shape);
+        if (intersect.first != nullptr){
+            local_color = Color(0,0,0);
+            break;
+        } 
+        local_color = getIllumination(point, hitted_shape); 
+    }
     
-    else local_color = getIllumination(point, hitted_shape);
 
     float r = hitted_shape->getMaterial().reflect_ratio;
     sf::Vector3f N = hitted_shape->getNormal(point);
@@ -103,7 +112,8 @@ Color Tracer::trace(const Ray& ray, int depth) {
     if (n_new != 1.0){
         sf::Vector3f refracted = refracted_dir(ray, N, n_new);
         
-        Ray new_ray = Ray(point, refracted, n_new);
+        sf::Vector3f to_center = 0.00001f*(hitted_shape->center - point);
+        Ray new_ray = Ray(point+to_center, refracted, n_new);
         
         auto exit = nearest_hit(new_ray, scene->objects);
         if (exit.first == nullptr) { 
@@ -122,8 +132,6 @@ Color Tracer::trace(const Ray& ray, int depth) {
         return local_color;
     }
     
-    
-
     
     sf::Vector3f reflected = N * dot(N,ray.direct) * (-2.0f) + ray.direct;
     Ray reflected_ray = Ray(point, reflected);

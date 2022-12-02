@@ -8,7 +8,7 @@ void Scene::addObjects(std::vector<Shape*> objects){
     this->objects = objects;
 }
 
-void Scene::addLight(sf::Vector3f light){
+void Scene::addLight(LightEmittor light){
     this->lights.push_back(light);
 }
 
@@ -37,6 +37,6 @@ std::vector<Shape*> Scene::getObjects(){
     return this->objects;
 }
 
-std::vector<sf::Vector3f> Scene::getLights() {
+std::vector<LightEmittor> Scene::getLights() {
     return this->lights;
 }

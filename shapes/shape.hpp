@@ -6,6 +6,7 @@
 
 class Shape {
   public:
+    sf::Vector3f center;
     virtual std::optional<sf::Vector3f> hit(const Ray&) = 0;
     virtual Color getColor() = 0;
     virtual sf::Vector3f getNormal(sf::Vector3f) = 0;
